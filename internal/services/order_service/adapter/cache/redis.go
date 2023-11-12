@@ -54,5 +54,6 @@ func (c *cache) Get(ctx context.Context, key uint64) (*domain.Order, error) {
 		ErrInternal.SetErr(err)
 		return &domain.Order{}, ErrInternal
 	}
+
 	return order, nil
 }
