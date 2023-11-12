@@ -1,0 +1,28 @@
+
+server:
+  port: !!str 8080
+  host: localhost
+  readtimeout: 5
+  writetimeout: 5
+  idletimeout: 5
+redis:
+  host: 127.0.0.1
+  port: 6379
+postgres:
+  dbdriver: postgres 
+  host: localhost
+  port: 5432
+  username: postgres
+  password: Wild54323
+  schema: postgres
+  sslmode: disable
+  migrationpath: "file://C:/Develop/myproject/internal/migrations"
+kafka:
+  protocol: tcp
+  host: localhost
+  port: 9093
+  topic: orders
+  groupid: myy-group
+prometheus:
+  host: localhost
+  port: 8082
