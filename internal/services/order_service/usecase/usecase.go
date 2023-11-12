@@ -75,7 +75,6 @@ func (u *usecase) Save(ctx context.Context, or model.Order) (uint64, error) {
 	if err != nil {
 		var er *apperrors.AppErr
 		if errors.As(err, &er) {
-
 			if er.Type() == apperrors.ErrNotFound {
 				ErrNotFound.AddLocation("Save-CheckUser")
 				ErrNotFound.SetErr(errors.New("user not found"))

@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"myproject/internal/apperrors"
 	"myproject/internal/domain"
 	"strconv"
@@ -42,11 +43,17 @@ func (c *cache) Set(ctx context.Context, key uint64, o *domain.Order) error {
 func (c *cache) Get(ctx context.Context, key uint64) (*domain.Order, error) {
 	sId := strconv.Itoa(int(key))
 
-	res := c.r.Get(ctx, sId)
-	respBytes, err := res.Bytes()
+	respBytes, err := c.r.Get(ctx, sId).Bytes()
 	if err != nil {
+		if err == redis.Nil {
+			ErrNotFound.AddLocation("Get-CheckResult")
+			ErrNotFound.SetErr(errors.New("order not found"))
+			return &domain.Order{}, ErrNotFound
+
+		}
 		return &domain.Order{}, err
 	}
+
 	var order *domain.Order
 	err = json.Unmarshal(respBytes, &order)
 	if err != nil {

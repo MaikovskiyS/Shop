@@ -19,7 +19,6 @@ func New(c *kafka.Conn) *msgbroker {
 }
 
 func (m *msgbroker) Send(o domain.Order) error {
-	log.Println("order in producer_send", o)
 	oBytes, err := json.Marshal(&o)
 	if err != nil {
 		return err

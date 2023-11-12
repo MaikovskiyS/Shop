@@ -3,7 +3,6 @@ package psql
 import (
 	"context"
 	"errors"
-	"log"
 	"myproject/internal/apperrors"
 	"myproject/internal/domain"
 
@@ -28,7 +27,6 @@ func New(c *pgx.Conn) *store {
 	}
 }
 func (s *store) Save(ctx context.Context, u domain.User) (uint64, error) {
-	log.Println("in user_storage")
 	tx, err := s.conn.Begin(ctx)
 	defer func() {
 		tx.Rollback(ctx)
@@ -117,7 +115,6 @@ func (s *store) GetByEmail(ctx context.Context, email string) (*domain.User, err
 	return &user, nil
 }
 func (s *store) GetById(ctx context.Context, id uint64) (*domain.User, error) {
-	log.Println("in user_get_by_id")
 	sql := "SELECT user_id, name, email,password,age FROM auth_users JOIN users ON users.id=auth_users.user_id WHERE users.id=$1"
 	d, err := s.conn.Prepare(ctx, "userById", sql)
 	if err != nil {
