@@ -1,0 +1,5 @@
+package productgenerator
+
+func New(){
+	
+}

@@ -30,6 +30,8 @@ func New(u usecase.Product) *api {
 		product: u,
 	}
 }
+
+// Validate input params from request; mapping to domain entity; save product
 func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
 		ErrBadRequest.AddLocation("Save-CheckMethod")
@@ -59,6 +61,8 @@ func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 	w.Write([]byte(str))
 	return nil
 }
+
+// Validate input params from request; mapping to domain entity; get product by id
 func (a *api) GetById(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
 		ErrBadRequest.AddLocation("GetByID-CheckMethod")
@@ -98,6 +102,8 @@ func (a *api) GetById(w http.ResponseWriter, r *http.Request) error {
 	w.Write(respBytes)
 	return nil
 }
+
+// Get all products
 func (a *api) GetAll(w http.ResponseWriter, r *http.Request) error {
 	ctx, cancel := context.WithTimeout(context.Background(), a.timeout)
 	defer cancel()

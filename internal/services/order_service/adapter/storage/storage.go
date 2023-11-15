@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-const location = "Order_Service-Storage"
+const location = "Order_Service-Storage-"
 
 var (
 	ErrBadRequest = apperrors.New(apperrors.ErrBadRequest, location)

@@ -28,8 +28,9 @@ func New(c *pgx.Conn) *storage {
 		conn: c,
 	}
 }
+
+// Save product in database
 func (s *storage) Save(ctx context.Context, p domain.Product) (uint64, error) {
-	//sql := "INSERT INTO products(category_id,category,name,price,image,created_at) values ($1,$2,$3,$4,$5,$6) RETURNING ID"
 	tx, err := s.conn.Begin(ctx)
 	if err != nil {
 		ErrInternal.AddLocation("Save-s.conn.Begin")
@@ -63,6 +64,8 @@ func (s *storage) Save(ctx context.Context, p domain.Product) (uint64, error) {
 	tx.Commit(ctx)
 	return id, nil
 }
+
+// Get product from database by id
 func (s *storage) GetByID(ctx context.Context, id uint64) (*domain.Product, error) {
 	sql := "SELECT categories.name,sku,products.name,price,image,created_at FROM products JOIN categories ON products.category_id=categories.id WHERE products.id=$1"
 	row := s.conn.QueryRow(ctx, sql, &id)
@@ -82,6 +85,8 @@ func (s *storage) GetByID(ctx context.Context, id uint64) (*domain.Product, erro
 	p.ID = id
 	return p, nil
 }
+
+// Get all products
 func (s *storage) GetAll(ctx context.Context) ([]*domain.Product, error) {
 
 	products := make([]*domain.Product, 0)

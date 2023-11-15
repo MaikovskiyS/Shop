@@ -28,6 +28,8 @@ func New(u usecase.Auth) *api {
 		auth:    u,
 	}
 }
+
+// Validate input params from request; mapping to domain entity; register user
 func (a *api) SignUp(w http.ResponseWriter, r *http.Request) error {
 	var input *signUpRequest
 	w.Header().Set("Content-Type", "application/json")
@@ -57,6 +59,8 @@ func (a *api) SignUp(w http.ResponseWriter, r *http.Request) error {
 	w.Write(respBytes)
 	return nil
 }
+
+// Validate input params from request; mapping to domain entity; login user
 func (a *api) SignIn(w http.ResponseWriter, r *http.Request) error {
 
 	var input *signInRequest

@@ -26,6 +26,8 @@ func New(c *pgx.Conn) *store {
 		conn: c,
 	}
 }
+
+// Save Users in database
 func (s *store) Save(ctx context.Context, u domain.User) (uint64, error) {
 	tx, err := s.conn.Begin(ctx)
 	defer func() {
@@ -65,6 +67,8 @@ func (s *store) Save(ctx context.Context, u domain.User) (uint64, error) {
 	}
 	return id, nil
 }
+
+// Get all Users
 func (s *store) GetAll(ctx context.Context) ([]domain.User, error) {
 	sql := "SELECT user_id, name, email,age FROM users JOIN auth_users ON users.id=auth_users.id"
 	rows, err := s.conn.Query(ctx, sql)
@@ -90,6 +94,8 @@ func (s *store) GetAll(ctx context.Context) ([]domain.User, error) {
 	}
 	return users, nil
 }
+
+// Get User by email
 func (s *store) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	sql := "SELECT user_id, name, email,password,age FROM auth_users JOIN users ON users.id=auth_users.user_id WHERE email=$1"
 	d, err := s.conn.Prepare(ctx, "userByEmail", sql)
@@ -114,6 +120,8 @@ func (s *store) GetByEmail(ctx context.Context, email string) (*domain.User, err
 	user.Age = uint8(age)
 	return &user, nil
 }
+
+// Get User by id
 func (s *store) GetById(ctx context.Context, id uint64) (*domain.User, error) {
 	sql := "SELECT user_id, name, email,password,age FROM auth_users JOIN users ON users.id=auth_users.user_id WHERE users.id=$1"
 	d, err := s.conn.Prepare(ctx, "userById", sql)

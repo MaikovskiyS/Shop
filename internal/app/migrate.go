@@ -9,6 +9,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
+// Run migrations
 func RunMigrations(cfg *config.Postgres) error {
 	dr, err := migrate.New(cfg.MigrationPath, cfg.ConnString())
 	if err != nil {

@@ -29,6 +29,8 @@ func New(o usecase.Order) *api {
 		order:   o,
 	}
 }
+
+// Validate input params from request; mapping to domain entity; save Order
 func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
 		ErrBadRequest.AddLocation("Save-CheckMethod")
@@ -57,6 +59,8 @@ func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 	w.Write([]byte("product created"))
 	return nil
 }
+
+// Validate input params from request; mapping to domain entity; get Order by id
 func (a *api) GetById(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodGet {
 		ErrBadRequest.AddLocation("GetByID-CheckMethod")

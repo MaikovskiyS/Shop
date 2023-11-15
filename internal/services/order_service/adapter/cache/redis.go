@@ -28,6 +28,8 @@ func New(rCl *redis.Client) *cache {
 		r:   rCl,
 	}
 }
+
+// Save order in cache
 func (c *cache) Set(ctx context.Context, key uint64, o *domain.Order) error {
 	sId := strconv.Itoa(int(key))
 	orderBytes, err := json.Marshal(&o)
@@ -40,6 +42,8 @@ func (c *cache) Set(ctx context.Context, key uint64, o *domain.Order) error {
 	st := c.r.Set(ctx, sId, orderBytes, c.ttl)
 	return st.Err()
 }
+
+// Get order form cache
 func (c *cache) Get(ctx context.Context, key uint64) (*domain.Order, error) {
 	sId := strconv.Itoa(int(key))
 

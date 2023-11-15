@@ -24,6 +24,7 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+// init dependences; starting server
 func Run(cfg *config.Config) error {
 
 	//init redis connection
@@ -42,8 +43,6 @@ func Run(cfg *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("kafka conn err %w", err)
 	}
-	//kbroker.SetReadDeadline(time.Now().Add(30 * time.Second))
-	//kbroker.SetWriteDeadline(time.Now().Add(30 * time.Second))
 
 	//init token service
 	tokenSvc, err := autorization.New()

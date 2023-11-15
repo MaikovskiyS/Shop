@@ -9,8 +9,6 @@ import (
 )
 
 func New(r *router.Router, pCl *pgx.Conn, auth usecase.TokenService, u usecase.UserService) usecase.Auth {
-
-	//store := storage.New(pCl)
 	svc := usecase.New(auth, u)
 	api := rest.New(svc)
 

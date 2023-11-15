@@ -31,6 +31,8 @@ type AppHandler func(w http.ResponseWriter, r *http.Request) error
 func New(ts tokenService) *middleware {
 	return &middleware{t: ts}
 }
+
+// Auth middleware checking autorization header and verify bearer token
 func (m *middleware) Auth(h AppHandler) AppHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		authorizationHeader := r.Header.Get(authorizationHeaderKey)
@@ -71,6 +73,8 @@ func (m *middleware) Auth(h AppHandler) AppHandler {
 		return nil
 	}
 }
+
+// Log request letency and answer from server
 func (m *middleware) Logging(h AppHandler) AppHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		t := time.Now()
@@ -89,6 +93,8 @@ func (m *middleware) Logging(h AppHandler) AppHandler {
 		return nil
 	}
 }
+
+// Handle Error and sending answer to client
 func (m *middleware) ErrorHandle(h AppHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := h(w, r)

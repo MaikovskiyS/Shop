@@ -15,6 +15,7 @@ const location = "Auth_Service-Usecase-"
 var (
 	ErrBadRequest = apperrors.New(apperrors.ErrBadRequest, location)
 	ErrNotFound   = apperrors.New(apperrors.ErrNotFound, location)
+	ErrInternal   = apperrors.New(apperrors.ErrInternal, location)
 )
 
 type Auth interface {
@@ -34,7 +35,7 @@ func New(t TokenService, u UserService) *usecase {
 	}
 }
 
-// need return value?
+// Checking income email; hash password; save user in DataBase
 func (u *usecase) SignUp(ctx context.Context, user domain.User) error {
 
 	_, err := u.user.GetByEmail(ctx, user.Email)
@@ -59,10 +60,11 @@ func (u *usecase) SignUp(ctx context.Context, user domain.User) error {
 	ErrBadRequest.SetErr(errors.New("user already exist"))
 	return ErrBadRequest
 }
+
+// Checking income email; check password; create auth token
 func (u *usecase) SignIn(ctx context.Context, inputUser domain.User) (string, error) {
 	user, err := u.user.GetByEmail(ctx, inputUser.Email)
 	if err != nil {
-
 		return "", err
 	}
 	if user == nil {

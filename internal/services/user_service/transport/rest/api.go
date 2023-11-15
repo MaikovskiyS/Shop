@@ -28,6 +28,7 @@ func New(svc usecase.User) *api {
 	return &api{svc: svc}
 }
 
+// Validate input params from request; mapping to domain entity; save User
 func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 	var request *SaveRequest
 	defer r.Body.Close()
@@ -58,6 +59,8 @@ func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 	w.Write(resBytes)
 	return nil
 }
+
+// Get all Users
 func (a *api) GetAll(w http.ResponseWriter, r *http.Request) error {
 	w.Header().Add("Content-Type", "application/json")
 	if r.Method != http.MethodGet {

@@ -13,6 +13,7 @@ type signUpRequest struct {
 	Age      string `json:"age"`
 }
 
+// Validate input signUpRequest
 func (s *signUpRequest) toModel() (domain.User, error) {
 	if s.Email == "" || s.Password == "" || s.Name == "" {
 		ErrBadRequest.AddLocation("SignUp-Tomodel-Validate")
@@ -44,6 +45,7 @@ type signInRequest struct {
 	Password string `json:"password"`
 }
 
+// Validate input signInRequest
 func (s *signInRequest) toModel() (domain.User, error) {
 	if s.Email == "" || s.Password == "" {
 		ErrBadRequest.AddLocation("SignIn-Tomodel-Validate")
