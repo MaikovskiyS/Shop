@@ -3,31 +3,39 @@ package usecase
 import (
 	"context"
 	"errors"
+	"log"
 	"myproject/internal/apperrors"
 	"myproject/internal/domain"
 	"myproject/internal/services/order_service/model"
 	"time"
 )
 
-var ErrNotFound = apperrors.New(apperrors.ErrNotFound, "Order_Service-Usecase-")
+var (
+	ErrNotFound = apperrors.New(apperrors.ErrNotFound, "Order_Service-Usecase-")
+	ErrInternal = apperrors.New(apperrors.ErrInternal, "Order_Service-Usecase-")
+)
 
 type Order interface {
 	Save(ctx context.Context, o model.Order) (uint64, error)
 	GetById(ctx context.Context, id uint64) (*domain.Order, error)
+	GetAll(ctx context.Context) ([]*domain.Order, error)
+	GetAllFromMongo(ctx context.Context) ([]*domain.Order, error)
 }
 type usecase struct {
-	user    User
-	cache   Cache
-	product Product
-	store   Storage
+	mongoRepo Mongo
+	user      User
+	cache     Cache
+	product   Product
+	store     Storage
 }
 
-func New(s Storage, pr Product, u User, c Cache) *usecase {
+func New(s Storage, pr Product, u User, c Cache, mR Mongo) *usecase {
 	return &usecase{
-		cache:   c,
-		product: pr,
-		store:   s,
-		user:    u,
+		mongoRepo: mR,
+		cache:     c,
+		product:   pr,
+		store:     s,
+		user:      u,
 	}
 }
 
@@ -70,6 +78,8 @@ func (u *usecase) GetById(ctx context.Context, id uint64) (*domain.Order, error)
 
 	return order, nil
 }
+
+// Save checking user
 func (u *usecase) Save(ctx context.Context, or model.Order) (uint64, error) {
 	user, err := u.user.GetById(ctx, or.UserId)
 	if err != nil {
@@ -104,7 +114,11 @@ func (u *usecase) Save(ctx context.Context, or model.Order) (uint64, error) {
 		//add storage with statuses
 		Status: "confirm",
 	}
-	orderId, err := u.store.Save(ctx, order)
+	// orderId, err := u.store.Save(ctx, order)
+	// if err != nil {
+	// 	return 0, err
+	// }
+	orderId, err := u.mongoRepo.Save(ctx, order)
 	if err != nil {
 		return 0, err
 	}
@@ -114,4 +128,47 @@ func (u *usecase) Save(ctx context.Context, or model.Order) (uint64, error) {
 		return 0, nil
 	}
 	return orderId, nil
+}
+func (u *usecase) GetAll(ctx context.Context) ([]*domain.Order, error) {
+	mOrders, err := u.store.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if mOrders == nil {
+		ErrInternal.AddLocation("GetAll-CheckOrders")
+		ErrInternal.SetErr(errors.New("nil orders from storage"))
+		return nil, ErrInternal
+	}
+
+	orders := make([]*domain.Order, len(mOrders))
+
+	for _, mOrder := range mOrders {
+		order := &domain.Order{
+			ID:           mOrder.ID,
+			UserID:       mOrder.UserID,
+			CustomerName: mOrder.CustomerName,
+			TotalPrice:   mOrder.TotalPrice,
+			CreatedAt:    mOrder.CreatedAt,
+			Status:       mOrder.Status,
+			Products:     make([]*domain.Product, len(mOrder.Products)),
+		}
+
+		tick := time.Now()
+		for i, pId := range mOrder.Products {
+
+			product, err := u.product.GetById(ctx, pId)
+			if err != nil {
+				return nil, err
+			}
+
+			order.Products[i] = product
+		}
+		log.Println(time.Since(tick))
+
+		orders = append(orders, order)
+	}
+	return orders, nil
+}
+func (u *usecase) GetAllFromMongo(ctx context.Context) ([]*domain.Order, error) {
+	return u.mongoRepo.GetAll(ctx)
 }

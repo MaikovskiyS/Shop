@@ -40,7 +40,14 @@ services:
       - "3000:3000"
     # volumes:
     #   - grafana-storage:/var/lib/grafana
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb-volume:/data/db
 volumes:
+  mongodb-volume:
   kafka-volume:
   zookeeper-volume:
   prometheus-volume:

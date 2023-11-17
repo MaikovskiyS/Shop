@@ -41,7 +41,7 @@ MainLoop:
 			}
 
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(900 * time.Microsecond)
 		if ticker == 2 {
 			return errors.New("ticker end")
 		}

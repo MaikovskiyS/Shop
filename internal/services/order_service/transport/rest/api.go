@@ -99,3 +99,37 @@ func (a *api) GetById(w http.ResponseWriter, r *http.Request) error {
 	w.Write(respBytes)
 	return nil
 }
+func (a *api) GetAll(w http.ResponseWriter, r *http.Request) error {
+
+	if r.Method != http.MethodGet {
+		ErrBadRequest.AddLocation("GetAll-CheckMethod")
+		ErrBadRequest.SetErr(errors.New("wrong method"))
+		return ErrBadRequest
+	}
+	// orders, err := a.order.GetAll(r.Context())
+	// if err != nil {
+	// 	return err
+	// }
+	orders, err := a.order.GetAllFromMongo(r.Context())
+	if err != nil {
+		return err
+	}
+	if orders == nil {
+		ErrInternal.AddLocation("GetAll-CheckNilOrders")
+		ErrInternal.SetErr(errors.New("cant get orders"))
+		return ErrInternal
+	}
+	resp := &GetAllResponse{Rows: uint64(len(orders)), Result: orders}
+
+	oBytes, err := json.Marshal(resp)
+	if err != nil {
+		ErrInternal.AddLocation("GetAll-json.Marshal")
+		ErrInternal.SetErr(err)
+		return ErrInternal
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(oBytes)
+	return nil
+}

@@ -111,3 +111,12 @@ func (m *middleware) ErrorHandle(h AppHandler) http.HandlerFunc {
 		}
 	}
 }
+func (m *middleware) Spammer(h AppHandler) AppHandler {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		err := h(w, r)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+}

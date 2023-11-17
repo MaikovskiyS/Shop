@@ -19,7 +19,10 @@ func RunMigrations(cfg *config.Postgres) error {
 
 	if err := dr.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Println(err)
-		dr.Drop()
+		err = dr.Drop()
+		if err != nil {
+			return err
+		}
 		return err
 	}
 

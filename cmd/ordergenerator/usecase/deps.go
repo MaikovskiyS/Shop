@@ -5,8 +5,8 @@ import (
 )
 
 type Sender interface {
-	Send(o domain.Order) error
+	Send(o *domain.Order) error
 }
 type OrderGenerator interface {
-	GenerateOrder() (domain.Order, error)
+	GenerateOrder() (*domain.Order, error)
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const location = "Product_Service-Storage-"
@@ -20,10 +21,10 @@ var (
 )
 
 type storage struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
-func New(c *pgx.Conn) *storage {
+func New(c *pgxpool.Pool) *storage {
 	return &storage{
 		conn: c,
 	}
@@ -88,15 +89,17 @@ func (s *storage) GetByID(ctx context.Context, id uint64) (*domain.Product, erro
 
 // Get all products
 func (s *storage) GetAll(ctx context.Context) ([]*domain.Product, error) {
-
 	products := make([]*domain.Product, 0)
 
-	rows, err := s.conn.Query(ctx, "SELECT categories.name,sku,products.name,price,image,created_at FROM products JOIN categories ON products.category_id=categories.id")
+	sql := "SELECT categories.name,sku,products.name,price,image,created_at FROM products JOIN categories ON products.category_id=categories.id"
+	rows, err := s.conn.Query(ctx, sql)
 	if err != nil {
 		ErrInternal.AddLocation("GetByID-s.conn.Query")
 		ErrInternal.SetErr(err)
 		return nil, ErrInternal
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		var p domain.Product
 		err := rows.Scan(&p.Category, &p.Sku, &p.Name, &p.Price, &p.Image, &p.CreatedAt)

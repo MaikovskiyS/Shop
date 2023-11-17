@@ -6,10 +6,10 @@ import (
 	"myproject/internal/services/product_service/transport/rest"
 	"myproject/internal/services/product_service/usecase"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(r *router.Router, pCl *pgx.Conn) usecase.Product {
+func New(r *router.Router, pCl *pgxpool.Pool) usecase.Product {
 	store := storage.New(pCl)
 	svc := usecase.New(store)
 	api := rest.New(svc)

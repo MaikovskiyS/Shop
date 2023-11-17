@@ -20,8 +20,11 @@ import (
 	"os/signal"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // init dependences; starting server
@@ -37,7 +40,23 @@ func Run(cfg *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("pgx conn Err: %w", err)
 	}
+	cc, err := pgxpool.ParseConfig(cfg.Psql.ConnString())
+	if err != nil {
+		return err
+	}
+	pool, err := pgxpool.NewWithConfig(context.Background(), cc)
+	if err != nil {
+		return err
+	}
 
+	// init mongo client
+	clientOptions := options.Client()
+	clientOptions.ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil {
+		return err
+	}
+	mongoDb := client.Database("shop")
 	//init kafka connection
 	kbroker, err := kafka.DialLeader(context.Background(), cfg.Kafka.Protocol, cfg.Kafka.HostPort(), cfg.Kafka.Topic, 0)
 	if err != nil {
@@ -57,25 +76,19 @@ func Run(cfg *config.Config) error {
 		log.Println("register metrics")
 		metrics.Register(router)
 	}()
+
 	//run order generator
 	genCtx, genExit := context.WithCancel(context.Background())
 
 	ogen := ordergenerator.New(genCtx, kbroker, router)
-	go func(context.Context) {
-		err := ogen.Generate(genCtx)
-		if err != nil {
-			log.Println("genStop Err: ", err)
-			return
-		}
-	}(genCtx)
 
 	//init services
 	appCtx, appExit := context.WithCancel(context.Background())
 
 	us := user_service.New(router, pdb, rdb)
 	auth_service.New(router, pdb, tokenSvc, us)
-	pr := product_service.New(router, pdb)
-	order_service.New(appCtx, router, pdb, pr, us, rdb, cfg)
+	pr := product_service.New(router, pool)
+	order_service.New(appCtx, router, pool, pr, us, rdb, mongoDb, cfg)
 
 	//init server
 	srv := server.New(cfg)
@@ -103,6 +116,13 @@ func Run(cfg *config.Config) error {
 			log.Printf("HTTP server Shutdown: %v", err)
 		}
 	}()
+	go func(context.Context) {
+		err := ogen.Generate(genCtx)
+		if err != nil {
+			log.Println("genStop Err: ", err)
+			return
+		}
+	}(genCtx)
 	log.Println("Starting server")
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		log.Fatalf("HTTP server ListenAndServe: %v", err)

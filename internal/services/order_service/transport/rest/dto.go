@@ -43,3 +43,8 @@ func (r *SaveRequest) toModel() (model.Order, error) {
 	}
 	return or, nil
 }
+
+type GetAllResponse struct {
+	Rows   uint64          `json:"rows"`
+	Result []*domain.Order `json:"orders"`
+}

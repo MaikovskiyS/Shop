@@ -20,8 +20,13 @@ type Product interface {
 type Storage interface {
 	Save(ctx context.Context, p *domain.Order) (uint64, error)
 	GetById(ctx context.Context, id uint64) (*model.StoreOrder, error)
+	GetAll(ctx context.Context) ([]*model.StoreOrder, error)
 }
 type Cache interface {
 	Get(ctx context.Context, key uint64) (*domain.Order, error)
 	Set(ctx context.Context, key uint64, o *domain.Order) error
+}
+type Mongo interface {
+	Save(ctx context.Context, op *domain.Order) (uint64, error)
+	GetAll(ctx context.Context) ([]*domain.Order, error)
 }

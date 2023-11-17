@@ -3,6 +3,7 @@ package consumer
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"myproject/internal/apperrors"
 	"myproject/internal/services/order_service/model"
@@ -27,11 +28,13 @@ type consumer struct {
 
 func New(reader *kafka.Reader, o usecase.Order) *consumer {
 	return &consumer{
-		timeout: time.Second * 30,
+		timeout: time.Second * 5,
 		reader:  reader,
 		order:   o,
 	}
 }
+
+// Save orders
 func (c *consumer) SaveOrders(ctx context.Context) error {
 	for {
 		ctxt, cancel := context.WithTimeout(ctx, c.timeout)
@@ -41,7 +44,7 @@ func (c *consumer) SaveOrders(ctx context.Context) error {
 			return ctx.Err()
 		default:
 
-			msg, err := c.reader.ReadMessage(ctxt)
+			msg, err := c.reader.ReadMessage(ctx)
 			if err != nil {
 				return err
 			}
@@ -54,17 +57,23 @@ func (c *consumer) SaveOrders(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			log.Println("DOMAINORDER: ", do)
+			//log.Println("DOMAINORDER: ", do)
 			mo := model.Order{UserId: do.UserID, ProductsIds: make([]uint64, len(do.Products))}
 			for i, product := range do.Products {
 				mo.ProductsIds[i] = product.ID
 			}
-			id, err := c.order.Save(ctxt, mo)
+			_, err = c.order.Save(ctxt, mo)
 			if err != nil {
+				var er *apperrors.AppErr
+				if errors.As(err, &er) {
+					log.Println(er.Log())
+					continue
+				}
+				log.Println(err)
 				return err
 			}
 
-			log.Printf("order created. ID: %v", id)
+			log.Printf("order created.")
 		}
 	}
 }

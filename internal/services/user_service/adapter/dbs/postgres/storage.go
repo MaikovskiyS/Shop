@@ -97,6 +97,8 @@ func (s *store) GetAll(ctx context.Context) ([]domain.User, error) {
 
 // Get User by email
 func (s *store) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	user := &domain.User{}
+
 	sql := "SELECT user_id, name, email,password,age FROM auth_users JOIN users ON users.id=auth_users.user_id WHERE email=$1"
 	d, err := s.conn.Prepare(ctx, "userByEmail", sql)
 	if err != nil {
@@ -104,7 +106,7 @@ func (s *store) GetByEmail(ctx context.Context, email string) (*domain.User, err
 		ErrInternal.SetErr(err)
 		return &domain.User{}, ErrInternal
 	}
-	var user domain.User
+
 	var age int
 	err = s.conn.QueryRow(ctx, d.SQL, email).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &age)
 	if err != nil {
@@ -118,11 +120,13 @@ func (s *store) GetByEmail(ctx context.Context, email string) (*domain.User, err
 		return &domain.User{}, ErrInternal
 	}
 	user.Age = uint8(age)
-	return &user, nil
+	return user, nil
 }
 
 // Get User by id
 func (s *store) GetById(ctx context.Context, id uint64) (*domain.User, error) {
+	user := &domain.User{}
+
 	sql := "SELECT user_id, name, email,password,age FROM auth_users JOIN users ON users.id=auth_users.user_id WHERE users.id=$1"
 	d, err := s.conn.Prepare(ctx, "userById", sql)
 	if err != nil {
@@ -131,7 +135,6 @@ func (s *store) GetById(ctx context.Context, id uint64) (*domain.User, error) {
 		return &domain.User{}, ErrInternal
 	}
 
-	user := &domain.User{}
 	var age int
 	err = s.conn.QueryRow(ctx, d.SQL, id).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &age)
 	if err != nil {

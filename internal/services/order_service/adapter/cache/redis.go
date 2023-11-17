@@ -38,7 +38,6 @@ func (c *cache) Set(ctx context.Context, key uint64, o *domain.Order) error {
 		ErrInternal.SetErr(err)
 		return ErrInternal
 	}
-
 	st := c.r.Set(ctx, sId, orderBytes, c.ttl)
 	return st.Err()
 }

@@ -18,7 +18,7 @@ func New(c *kafka.Conn) *msgbroker {
 	}
 }
 
-func (m *msgbroker) Send(o domain.Order) error {
+func (m *msgbroker) Send(o *domain.Order) error {
 	oBytes, err := json.Marshal(&o)
 	if err != nil {
 		return err
