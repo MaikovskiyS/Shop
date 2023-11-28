@@ -128,15 +128,9 @@ func (s *store) GetById(ctx context.Context, id uint64) (*domain.User, error) {
 	user := &domain.User{}
 
 	sql := "SELECT user_id, name, email,password,age FROM auth_users JOIN users ON users.id=auth_users.user_id WHERE users.id=$1"
-	d, err := s.conn.Prepare(ctx, "userById", sql)
-	if err != nil {
-		ErrInternal.AddLocation("GetByID-s.conn.Prepare")
-		ErrInternal.SetErr(err)
-		return &domain.User{}, ErrInternal
-	}
 
 	var age int
-	err = s.conn.QueryRow(ctx, d.SQL, id).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &age)
+	err := s.conn.QueryRow(ctx, sql, id).Scan(&user.Id, &user.Name, &user.Email, &user.Password, &age)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			ErrNotFound.AddLocation("GetByID-ErrNoRows")

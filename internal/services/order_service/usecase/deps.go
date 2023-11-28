@@ -26,7 +26,3 @@ type Cache interface {
 	Get(ctx context.Context, key uint64) (*domain.Order, error)
 	Set(ctx context.Context, key uint64, o *domain.Order) error
 }
-type Mongo interface {
-	Save(ctx context.Context, op *domain.Order) (uint64, error)
-	GetAll(ctx context.Context) ([]*domain.Order, error)
-}

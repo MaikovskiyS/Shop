@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"log"
 	"myproject/internal/apperrors"
 	"myproject/internal/domain"
 
@@ -29,13 +30,7 @@ func (s *store) Save(ctx context.Context, or *domain.Order) (uint64, error) {
 		ErrInternal.SetErr(err)
 		return 0, ErrInternal
 	}
-	// id, ok := res.InsertedID.(string)
-	// if !ok {
-	// 	ErrInternal.AddLocation("Save-CheckId")
-	// 	ErrInternal.SetErr(errors.New("wrong id type"))
-	// 	return 0, ErrInternal
-	// }
-	//fmt.Printf("id: %v\n", id)
+	log.Println("order saved")
 	return 0, nil
 }
 func (s *store) GetAll(ctx context.Context) ([]*domain.Order, error) {

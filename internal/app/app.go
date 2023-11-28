@@ -10,6 +10,7 @@ import (
 	"myproject/internal/metrics"
 	"myproject/internal/server"
 	"myproject/internal/server/router"
+	"myproject/internal/services/analitics_service"
 	"myproject/internal/services/auth_service"
 	"myproject/internal/services/order_service"
 	"myproject/internal/services/product_service"
@@ -51,12 +52,14 @@ func Run(cfg *config.Config) error {
 
 	// init mongo client
 	clientOptions := options.Client()
+	clientOptions.SetMaxPoolSize(80)
 	clientOptions.ApplyURI("mongodb://localhost:27017")
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		return err
 	}
 	mongoDb := client.Database("shop")
+
 	//init kafka connection
 	kbroker, err := kafka.DialLeader(context.Background(), cfg.Kafka.Protocol, cfg.Kafka.HostPort(), cfg.Kafka.Topic, 0)
 	if err != nil {
@@ -88,7 +91,8 @@ func Run(cfg *config.Config) error {
 	us := user_service.New(router, pdb, rdb)
 	auth_service.New(router, pdb, tokenSvc, us)
 	pr := product_service.New(router, pool)
-	order_service.New(appCtx, router, pool, pr, us, rdb, mongoDb, cfg)
+	order_service.New(appCtx, router, pool, pr, us, rdb, cfg)
+	analitics_service.New(appCtx, router, kbroker, mongoDb, cfg)
 
 	//init server
 	srv := server.New(cfg)
@@ -109,6 +113,9 @@ func Run(cfg *config.Config) error {
 		}
 		if err = kbroker.Close(); err != nil {
 			log.Printf("Kafka conn Close Err: %s", err)
+		}
+		if err = mongoDb.Client().Disconnect(context.Background()); err != nil {
+			log.Printf("Mongo conn Close Err: %s", err)
 		}
 		log.Println("connections closed")
 

@@ -1,5 +1,0 @@
-package productgenerator
-
-func New(){
-	
-}

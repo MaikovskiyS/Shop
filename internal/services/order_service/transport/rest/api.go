@@ -45,18 +45,18 @@ func (a *api) Save(w http.ResponseWriter, r *http.Request) error {
 		return ErrBadRequest
 	}
 	r.Body.Close()
-	product, err := input.toModel()
+	order, err := input.toModel()
 	if err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), a.timeout)
 	defer cancel()
-	_, err = a.order.Save(ctx, product)
+	_, err = a.order.Save(ctx, order)
 	if err != nil {
 		return err
 	}
 	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("product created"))
+	w.Write([]byte("order created"))
 	return nil
 }
 
@@ -106,14 +106,11 @@ func (a *api) GetAll(w http.ResponseWriter, r *http.Request) error {
 		ErrBadRequest.SetErr(errors.New("wrong method"))
 		return ErrBadRequest
 	}
-	// orders, err := a.order.GetAll(r.Context())
-	// if err != nil {
-	// 	return err
-	// }
-	orders, err := a.order.GetAllFromMongo(r.Context())
+	orders, err := a.order.GetAll(r.Context())
 	if err != nil {
 		return err
 	}
+
 	if orders == nil {
 		ErrInternal.AddLocation("GetAll-CheckNilOrders")
 		ErrInternal.SetErr(errors.New("cant get orders"))

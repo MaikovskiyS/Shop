@@ -46,7 +46,18 @@ services:
       - '27017:27017'
     volumes:
       - mongodb-volume:/data/db
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - PORT:5432
+      - HOST:127.0.0.1
+      - POSTGRES_USER:postgres
+      - POSTGRES_PASSWORD:Wild54323
+    ports:
+      -"5432:5432"   
 volumes:
+  postgres-volume:
   mongodb-volume:
   kafka-volume:
   zookeeper-volume:
