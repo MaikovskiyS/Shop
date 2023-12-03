@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"time"
 )
 
@@ -41,10 +40,11 @@ MainLoop:
 			}
 
 		}
-		time.Sleep(900 * time.Microsecond)
-		if ticker == 2 {
-			return errors.New("ticker end")
-		}
+		//time.Sleep(900 * time.Microsecond)
+		time.Sleep(2 * time.Second)
+		// if ticker == 2 {
+		// 	return errors.New("ticker end")
+		// }
 		ticker++
 	}
 	return ctx.Err()

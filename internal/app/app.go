@@ -74,11 +74,9 @@ func Run(cfg *config.Config) error {
 
 	//init router
 	router := router.New(tokenSvc)
-	go func() {
-		//TODO: gorutine leaking
-		log.Println("register metrics")
-		metrics.Register(router)
-	}()
+
+	//register metrics
+	go metrics.Run()
 
 	//run order generator
 	genCtx, genExit := context.WithCancel(context.Background())
@@ -94,8 +92,9 @@ func Run(cfg *config.Config) error {
 	order_service.New(appCtx, router, pool, pr, us, rdb, cfg)
 	analitics_service.New(appCtx, router, kbroker, mongoDb, cfg)
 
-	//init server
+	//init http server
 	srv := server.New(cfg)
+
 	srv.SetHandler(router)
 
 	//shutdown server and connections

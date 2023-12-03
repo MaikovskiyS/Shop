@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log"
 	"myproject/internal/apperrors"
+	"myproject/internal/metrics"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
@@ -29,7 +32,9 @@ type middleware struct {
 type AppHandler func(w http.ResponseWriter, r *http.Request) error
 
 func New(ts tokenService) *middleware {
-	return &middleware{t: ts}
+	return &middleware{
+		t: ts,
+	}
 }
 
 // Auth middleware checking autorization header and verify bearer token
@@ -79,7 +84,9 @@ func (m *middleware) Logging(h AppHandler) AppHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		t := time.Now()
 		err := h(w, r)
+
 		log.Println(time.Since(t))
+
 		if err != nil {
 			var er *apperrors.AppErr
 			if errors.As(err, &er) {
@@ -111,12 +118,16 @@ func (m *middleware) ErrorHandle(h AppHandler) http.HandlerFunc {
 		}
 	}
 }
-func (m *middleware) Spammer(h AppHandler) AppHandler {
+func (m *middleware) Metrics(h AppHandler) AppHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		timer := prometheus.NewTimer(metrics.RequestDuration.WithLabelValues(r.RequestURI))
 		err := h(w, r)
 		if err != nil {
 			return err
 		}
+		timer.ObserveDuration()
+		metrics.TotalRequests.WithLabelValues(r.RequestURI).Inc()
+		metrics.ResponseStatus.WithLabelValues(r.Method)
 		return nil
 	}
 }

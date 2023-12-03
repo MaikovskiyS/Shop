@@ -38,26 +38,30 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=secret
     # volumes:
-    #   - grafana-storage:/var/lib/grafana
+    #   - ./grafana/provisioning:/etc/grafana/provisioning
+    #   - ./grafana/dashboards:/var/lib/grafana/dashboards
   mongodb:
     image: mongo:6-jammy
     ports:
       - '27017:27017'
     volumes:
       - mongodb-volume:/data/db
-  postgres:
-    image: postgres
-    restart: always
-    environment:
-      - PORT:5432
-      - HOST:127.0.0.1
-      - POSTGRES_USER:postgres
-      - POSTGRES_PASSWORD:Wild54323
-    ports:
-      -"5432:5432"   
+  # postgres:
+  #   image: postgres
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_HOST_AUTH_METHOD=trust
+  #     - PORT:5432
+  #     - HOST:127.0.0.1
+  #     - POSTGRES_USER:postgres
+  #     - POSTGRES_PASSWORD:Wild54323
+  #   ports:
+  #     - "5432:5432"
 volumes:
-  postgres-volume:
+ ## postgres-volume:
   mongodb-volume:
   kafka-volume:
   zookeeper-volume:

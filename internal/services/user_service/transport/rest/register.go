@@ -5,6 +5,6 @@ import (
 )
 
 func (a *api) RegisterRoutes(r *router.Router) {
-	r.HandleFunc("/users", r.ErrorHandle(r.Logging(r.Auth(a.GetAll))))
-	r.HandleFunc("/user", r.ErrorHandle(r.Logging(r.Auth(a.Save))))
+	r.HandleFunc("/users", r.ErrorHandle(r.Metrics(r.Logging(r.Auth(a.GetAll)))))
+	r.HandleFunc("/user", r.ErrorHandle(r.Metrics(r.Logging(r.Auth(a.Save)))))
 }
