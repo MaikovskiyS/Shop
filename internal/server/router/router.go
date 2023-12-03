@@ -9,7 +9,7 @@ type Middle interface {
 	Auth(h middleware.AppHandler) middleware.AppHandler
 	Logging(h middleware.AppHandler) middleware.AppHandler
 	ErrorHandle(h middleware.AppHandler) http.HandlerFunc
-	Spammer(h middleware.AppHandler) middleware.AppHandler
+	Metrics(h middleware.AppHandler) middleware.AppHandler
 }
 type tokenService interface {
 	VerifyToken(accessToken string) (bool, error)

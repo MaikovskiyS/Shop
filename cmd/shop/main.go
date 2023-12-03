@@ -15,23 +15,24 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	err = app.Run(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 /*
 logger
 linters
 gRPC
-mongo
-metrics
+graphQl
+mongo +
+metrics +
 swagger
 ci/cd
 werf
-async
+async +
 clickhouse
 elastic
 */
